@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brechó Borboleta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="flex justify-center m-2">
+        <button onclick="abrirModal()" id="btn_addproduto" class="bg-purple-600 p-4 rounded ">Adicionar Produto</button>
+    </div>
+    <div id="modal" class="hidden m-5">
+        <h2>Imagens</h2>
+        <input type="file" id="imagens" accept="image/jpeg, image/png" multiple>
+        <h3>Título</h3>
+        <input type="text" id="titulo" placeholder="Digite aqui o titulo do seu produto">
+        <h3>Descrição</h3>
+        <textarea id="descricao" placeholder="Digite aqui a descrição do seu produto"></textarea>
+        <button onclick="fecharModal()">Cancelar</button>
+        <button onclick="confirmarProduto()">Confirmar</button>
+    </div>
+
+<!-- Usando Jinja2 para puxar os produtos do Banco para o HTML -->
+{% for produto in produtos %}
+    <div id="produto-{{ produto[0] }}">
+        <img src="{{ produto[3] }}" alt="{{ produto[1] }}">
+        <p>{{ produto[1] }}</p>
+        <p>{{ produto[2] }}</p>
+        <button onclick="deletarProduto({{produto[0]}})" class="bg-red-300 p-2 rounded">Vendido</button>
+        <button onclick="compartilhar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[3] }}')">Compartilhar</button>
+    </div>
+    
+{% endfor %}
+
+    <script>
+        const modal = document.getElementById('modal')
+        function abrirModal() {
+            modal.classList.remove('hidden')
+        }
+        function fecharModal() {
+            modal.classList.add('hidden')
+        }
+        function confirmarProduto() {
+            const titulo = document.getElementById('titulo').value
+            const descricao = document.getElementById('descricao').value
+            const imagens = document.getElementById('imagens').files
+            const formData = new FormData()
+            formData.append('titulo', titulo)
+            formData.append('descricao', descricao)
+            for(let i = 0; i < imagens.length; i++) {
+                formData.append('imagens', imagens[i])
+            }          
+            fecharModal()
+            fetch('/adicionar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(() => location.reload())
+        }
+        function deletarProduto(id) {
+            const formData = new FormData()
+            formData.append('id', id)
+
+            fetch('/deletar', {
+                method: 'POST',
+                body: formData
+                })
+            .then(() => {
+            document.getElementById('produto-' + id).remove()
+                })
+        }
+        function compartilhar(id, titulo, descricao, img1) {
+            const texto = `${titulo}\n${descricao}\n${img1}`
+            window.open('https://wa.me/?text=' + encodeURIComponent(texto))
+            }
+    </script>
+</body>
+</html>
