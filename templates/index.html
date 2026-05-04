@@ -3,36 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brechó Borboleta</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Gerenciador Brechó</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
-<body>
+<body class="bg-linen min-h-screen">
+    <a href="/login" id="logo" class="flex justify-center">
+    <img src="{{ url_for('static', filename='assets/logo_brecho.png') }}" class="w-36 h-36 mt-2">
+    </a>
     <div class="flex justify-center m-2">
-        <button onclick="abrirModal()" id="btn_addproduto" class="bg-purple-600 p-4 rounded ">Adicionar Produto</button>
+        <button onclick="abrirModal()" id="btn_addproduto" class="hover:brightness-110 hover:animate-pulse font-bold py-3 px-6 rounded-full
+        bg-gradient-to-r from-orange-200 to-red-500 text-white">Adicionar Produto</button>
     </div>
-    <div id="modal" class="hidden m-5">
-        <h2>Imagens</h2>
-        <input type="file" id="imagens" accept="image/jpeg, image/png" multiple>
-        <h3>Título</h3>
-        <input type="text" id="titulo" placeholder="Digite aqui o titulo do seu produto">
-        <h3>Descrição</h3>
-        <textarea id="descricao" placeholder="Digite aqui a descrição do seu produto"></textarea>
-        <button onclick="fecharModal()">Cancelar</button>
-        <button onclick="confirmarProduto()">Confirmar</button>
+    <div id="modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <h1 class="text-modal">Imagens</h1>
+            <input type="file" id="imagens" accept="image/jpeg, image/png" multiple class="italic border-1 border-black rounded-lg p-2 mt-1 mb-3 bg-pencil-light cursor-pointer">
+            <h1 class="text-modal">Título</h1>
+            <input type="text" id="titulo" placeholder="Digite aqui o titulo do produto" class="placeholder_modal">
+            <h1 class="text-modal">Descrição</h1>
+            <textarea id="descricao" placeholder="Digite aqui a descrição do produto" class="placeholder_modal resize-none h-24"></textarea>
+            <h1 class="text-modal">Preço</h1>
+            <input type="number" id="preco" placeholder="Digite aqui o preço do produto" class="placeholder_modal">
+            <div class="flex gap-2 mt-2 justify-center">
+                <button onclick="fecharModal()" class="btn-vendido">Cancelar</button>
+                <button onclick="confirmarProduto()" class="btn-whatsapp">Confirmar</button>
+            </div>
+        </div>
     </div>
 
 <!-- Usando Jinja2 para puxar os produtos do Banco para o HTML -->
+<div class="div-cards">
 {% for produto in produtos %}
-    <div id="produto-{{ produto[0] }}">
-        <img src="{{ produto[3] }}" alt="{{ produto[1] }}">
-        <p>{{ produto[1] }}</p>
-        <p>{{ produto[2] }}</p>
-        <button onclick="deletarProduto({{produto[0]}})" class="bg-red-300 p-2 rounded">Vendido</button>
-        <button onclick="compartilhar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[3] }}')">Compartilhar</button>
+    <div id="produto-{{ produto[0] }}" class="card-produto flex flex-col">
+        <img src="{{ produto[3] }}" alt="{{ produto[1] }}" class="card-imagem">
+        <div class="p-2 flex flex-col flex-1">
+            <p class="font-display text-xl text-ink font-semibold">{{ produto[1] }}</p>
+            <p class="">ID: {{ produto[0] }}</p>
+            <p class="font-display text-xl text-ink font-semibold">R$ {{ produto[7] }}</p>
+            <p class="text-pencil mt-2">{{ produto[2] }}</p>
+            <div class="flex gap-1 mt-auto justify-center">
+                {% if session.get('logado') %}
+                    <button onclick="deletarProduto({{produto[0]}})" class="btn-vendido">Vendido</button>
+                    <button class="btn-alterar">Alterar</button>
+                {% endif %}
+                <button onclick="compartilhar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[3] }}')" class="btn-whatsapp">Compartilhar</button>
+            </div>
+        </div>
     </div>
-    
 {% endfor %}
-
+</div>
     <script>
         const modal = document.getElementById('modal')
         function abrirModal() {
@@ -45,12 +67,19 @@
             const titulo = document.getElementById('titulo').value
             const descricao = document.getElementById('descricao').value
             const imagens = document.getElementById('imagens').files
+            const preco = document.getElementById('preco').value
             const formData = new FormData()
             formData.append('titulo', titulo)
             formData.append('descricao', descricao)
+            formData.append('preco', preco)
             for(let i = 0; i < imagens.length; i++) {
                 formData.append('imagens', imagens[i])
-            }          
+            }
+            if (!titulo || !descricao || !preco || imagens.length === 0) {
+                alert('Preencha todos os campos e adicione pelo menos uma imagem')
+                return
+            }
+                     
             fecharModal()
             fetch('/adicionar', {
                 method: 'POST',
@@ -71,9 +100,12 @@
                 })
         }
         function compartilhar(id, titulo, descricao, img1) {
-            const texto = `${titulo}\n${descricao}\n${img1}`
+            const texto = `${titulo}\n${descricao}\n${id}`
             window.open('https://wa.me/?text=' + encodeURIComponent(texto))
             }
     </script>
+<footer class="text-center p-4 text-pencil mt-8">
+    Desenvolvido por Henrique Stafocher
+</footer>
 </body>
 </html>

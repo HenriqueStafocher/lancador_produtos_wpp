@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_mysqldb import MySQL
 import cloudinary
 import cloudinary.uploader
@@ -10,11 +10,19 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configurações do MySQL usando os.getenv
-app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
-app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
-app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
-app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
+# app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
+# app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+# app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+# app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
+
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'ijkl30015'
+app.config['MYSQL_DB'] = 'brecho'
 mysql = MySQL(app)
+
+# Login Admnistrador
+app.secret_key = os.getenv('SECRET_KEY')
 
 # Configurações do Cloudinary usando os.getenv
 cloudinary.config(
@@ -35,6 +43,9 @@ def index():
 def deletar_produto():
     id = request.form['id']
     cursor = mysql.connection.cursor()
+    cursor.execute("SELECT titulo, preco FROM produtos WHERE id = %s", (id,))
+    produto = cursor.fetchone()
+    cursor.execute("INSERT INTO vendas (titulo, preco, date) VALUES (%s, %s, NOW())", (produto[0], produto[1]))
     cursor.execute("DELETE FROM produtos WHERE id = %s", (id,))
     mysql.connection.commit()
     cursor.close()
@@ -55,11 +66,26 @@ def adicionar_produto():
 
     titulo = request.form['titulo']
     descricao = request.form['descricao']
+    preco = request.form['preco']
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO produtos (titulo, descricao, img1, img2, img3) VALUES (%s, %s, %s, %s, %s)", (titulo, descricao, img1_url, img2_url, img3_url))
+    cursor.execute("INSERT INTO produtos (titulo, descricao, preco, img1, img2, img3) VALUES (%s, %s, %s, %s, %s, %s)", (titulo, descricao, preco, img1_url, img2_url, img3_url))
     mysql.connection.commit()
     cursor.close()
     return 'Produto POSTADO'
+
+@app.route('/login', methods=['GET'])
+def login():
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def fazer_login():
+    usuario = request.form['usuario']
+    senha = request.form['senha']
+    if usuario == os.getenv('ADMIN_USER') and senha == os.getenv('ADMIN_PASSWORD'):
+        session['logado'] = True
+        return redirect(url_for('index'))
+    else:
+        return render_template('login.html', erro='Usuário ou senha incorretos')
 
 if __name__ == '__main__':
     app.run(debug=True)

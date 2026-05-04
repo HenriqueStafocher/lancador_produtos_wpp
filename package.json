@@ -1,0 +1,26 @@
+{
+  "name": "python_flask---brecho-automated",
+  "version": "1.0.0",
+  "description": "> Feito com ❤️ especialmente para minha mãe utilizar em seu grupo de brechó.",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/input.css -o ./static/output.css",
+    "watch:css": "tailwindcss -i ./static/input.css -o ./static/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HenriqueStafocher/lancador_produtos_wpp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HenriqueStafocher/lancador_produtos_wpp/issues"
+  },
+  "homepage": "https://github.com/HenriqueStafocher/lancador_produtos_wpp#readme",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.4",
+    "tailwindcss": "^4.2.4"
+  }
+}

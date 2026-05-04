@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela de Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fraunces:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
+</head>
+<body>
+    <form method="POST" action="/login">
+        <div class="m-4 p-12 text-center rounded-lg border-2 bg-purple-300 max-w-md mx-auto">
+            <h1>Painel de Login</h1>
+            <div class="flex flex-col">
+            <input name="usuario" class="rounded-full border text-center mt-4 p-2 outline-none" placeholder="Nome do Usuário">
+            <input name="senha" class="rounded-full border text-center mt-6 p-2 outline-none" type="password" placeholder="Digite sua senha">
+            </div>
+            <h4 class="mt-2">Nunca passe sua senha pra ninguém!</h4>
+            <button type="submit" class="mt-6 bg-purple-600 text-white px-6 py-2 rounded-full cursor-pointer hover:bg-purple-700">
+            Entrar
+            </button>
+        </div>
+    </form>
+</body>
+</html>
