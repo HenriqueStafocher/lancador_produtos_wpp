@@ -28,8 +28,10 @@
         {% endif %}
     </div>
     <div class="flex justify-center m-2">
+        {% if session.get('logado') %}
         <button onclick="abrirModal()" id="btn_addproduto" class="hover:brightness-110 hover:animate-pulse font-bold py-3 px-6 rounded-full 
         bg-gradient-to-r from-orange-200 to-red-500 text-white">Adicionar Produto</button>
+        {% endif %}
     </div>
 
     <!-- Modal Adicionar Produto -->
