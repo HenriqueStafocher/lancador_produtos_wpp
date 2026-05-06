@@ -36,8 +36,15 @@ def index():
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM produtos WHERE disponivel = True')
     produtos = cursor.fetchall()
+
+    cursor.execute('SELECT SUM(preco) FROM vendas')
+    total_geral = cursor.fetchone()[0] or 0
+
+    cursor.execute('SELECT SUM(preco) FROM vendas WHERE date >= DATE_SUB(NOW(), INTERVAL 30 DAY)')
+    total_mensal = cursor.fetchone()[0] or 0
+
     cursor.close()
-    return render_template('index.html', produtos=produtos)
+    return render_template('index.html', produtos=produtos, total_geral=total_geral, total_mensal=total_mensal)
 
 @app.route('/deletar', methods=['POST'])
 def deletar_produto():
@@ -86,6 +93,27 @@ def fazer_login():
         return redirect(url_for('index'))
     else:
         return render_template('login.html', erro='Usuário ou senha incorretos')
+
+
+@app.route('/produto/<int:id>')
+def produto_detalhe(id):
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM produtos WHERE id = %s', (id,))
+    produto = cursor.fetchone()
+    cursor.close()
+    return render_template('produto.html', produto=produto)
+
+@app.route('/alterar', methods=['POST'])
+def alterar_produto():
+    id = request.form['id']
+    titulo = request.form['titulo']
+    descricao = request.form['descricao']
+    preco = request.form['preco']
+    cursor = mysql.connection.cursor()
+    cursor.execute("UPDATE produtos SET titulo = %s, descricao = %s, preco = %s WHERE id = %s", (titulo, descricao, preco, id))
+    mysql.connection.commit()
+    cursor.close()
+    return 'ok'
 
 if __name__ == '__main__':
     app.run(debug=True)

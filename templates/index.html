@@ -10,13 +10,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
 <body class="bg-linen min-h-screen">
-    <a href="/login" id="logo" class="flex justify-center">
-    <img src="{{ url_for('static', filename='assets/logo_brecho.png') }}" class="w-36 h-36 mt-2">
-    </a>
+    <div class="">
+        <a href="/login" id="logo" class="flex justify-center">
+            <img src="{{ url_for('static', filename='assets/logo_brecho.png') }}" class="w-36 h-36 mt-2">
+        </a>
+        {% if session.get('logado') %}
+            <div class="flex justify-center gap-8 m-4">
+                <div class="bg-true-white rounded-2xl shadow-card p-4 text-center">
+                    <p class="text-pencil text-sm">Últimos 30 dias</p>
+                    <p class="font-display text-2xl font-bold text-cedar">R$ {{ total_mensal }}</p>
+                </div>
+                <div class="bg-true-white rounded-2xl shadow-card p-4 text-center">
+                    <p class="text-pencil text-sm">Total geral</p>
+                    <p class="font-display text-2xl font-bold text-cedar">R$ {{ total_geral }}</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
     <div class="flex justify-center m-2">
-        <button onclick="abrirModal()" id="btn_addproduto" class="hover:brightness-110 hover:animate-pulse font-bold py-3 px-6 rounded-full
+        <button onclick="abrirModal()" id="btn_addproduto" class="hover:brightness-110 hover:animate-pulse font-bold py-3 px-6 rounded-full 
         bg-gradient-to-r from-orange-200 to-red-500 text-white">Adicionar Produto</button>
     </div>
+
+    <!-- Modal Adicionar Produto -->
     <div id="modal" class="modal-overlay hidden">
         <div class="modal-container">
             <h1 class="text-modal">Imagens</h1>
@@ -34,35 +50,64 @@
         </div>
     </div>
 
-<!-- Usando Jinja2 para puxar os produtos do Banco para o HTML -->
-<div class="div-cards">
-{% for produto in produtos %}
-    <div id="produto-{{ produto[0] }}" class="card-produto flex flex-col">
-        <img src="{{ produto[3] }}" alt="{{ produto[1] }}" class="card-imagem">
-        <div class="p-2 flex flex-col flex-1">
-            <p class="font-display text-xl text-ink font-semibold">{{ produto[1] }}</p>
-            <p class="">ID: {{ produto[0] }}</p>
-            <p class="font-display text-xl text-ink font-semibold">R$ {{ produto[7] }}</p>
-            <p class="text-pencil mt-2">{{ produto[2] }}</p>
-            <div class="flex gap-1 mt-auto justify-center">
-                {% if session.get('logado') %}
-                    <button onclick="deletarProduto({{produto[0]}})" class="btn-vendido">Vendido</button>
-                    <button class="btn-alterar">Alterar</button>
-                {% endif %}
-                <button onclick="compartilhar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[3] }}')" class="btn-whatsapp">Compartilhar</button>
+    <!-- Modal Alterar Produto -->
+    <div id="modal-alterar" class="modal-overlay hidden">
+        <div class="modal-container">
+            <input type="hidden" id="alterar-id">
+            <h1 class="text-modal">Título</h1>
+            <input type="text" id="alterar-titulo" class="placeholder_modal">
+            <h1 class="text-modal">Descrição</h1>
+            <textarea id="alterar-descricao" class="placeholder_modal resize-none h-24"></textarea>
+            <h1 class="text-modal">Preço</h1>
+            <input type="number" id="alterar-preco" class="placeholder_modal">
+            <div class="flex gap-2 mt-2 justify-center">
+                <button onclick="fecharModalAlterar()" class="btn-vendido">Cancelar</button>
+                <button onclick="salvarAlteracao()" class="btn-whatsapp">Salvar</button>
             </div>
         </div>
     </div>
-{% endfor %}
-</div>
+
+    <!-- Usando Jinja2 para puxar os produtos do Banco para o HTML -->
+    <div class="div-cards">
+    {% for produto in produtos %}
+        <div id="produto-{{ produto[0] }}" class="card-produto flex flex-col">
+            <img src="{{ produto[3] }}" alt="{{ produto[1] }}" class="card-imagem">
+            <div class="p-2 flex flex-col flex-1">
+                <p class="font-display text-xl text-ink font-semibold">{{ produto[1] }}</p>
+                <p class="">ID: {{ produto[0] }}</p>
+                <p class="font-display text-xl text-ink font-semibold">R$ {{ produto[7] }}</p>
+                <p class="text-pencil">{{ produto[2] }}</p>
+                <div class="flex flex-wrap gap-2 justify-center mt-2 mx-auto px-4 w-full">
+                    {% if session.get('logado') %}
+                        <button onclick="deletarProduto({{produto[0]}})" class="btn-vendido">Vendido</button>
+                        <button onclick="modalAlterar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', {{ produto[7] }})" class="btn-alterar">Alterar</button>
+                        <button onclick="compartilhar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[7] }}', '{{ produto[3] }}')" class="btn-whatsapp">Compartilhar</button>
+                    {% endif %}
+                    <button onclick="encomendar('{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[0] }}', '{{ produto[7] }}')" class="btn-encomendar">Encomendar</button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+
+    <div>
+        
+    </div>
+
     <script>
         const modal = document.getElementById('modal')
+        const modalAlterar_el = document.getElementById('modal-alterar')
+
         function abrirModal() {
             modal.classList.remove('hidden')
         }
         function fecharModal() {
             modal.classList.add('hidden')
         }
+        function fecharModalAlterar() {
+            modalAlterar_el.classList.add('hidden')
+        }
+
         function confirmarProduto() {
             const titulo = document.getElementById('titulo').value
             const descricao = document.getElementById('descricao').value
@@ -79,7 +124,6 @@
                 alert('Preencha todos os campos e adicione pelo menos uma imagem')
                 return
             }
-                     
             fecharModal()
             fetch('/adicionar', {
                 method: 'POST',
@@ -87,25 +131,60 @@
             })
             .then(() => location.reload())
         }
+
         function deletarProduto(id) {
             const formData = new FormData()
             formData.append('id', id)
-
             fetch('/deletar', {
                 method: 'POST',
                 body: formData
-                })
+            })
             .then(() => {
-            document.getElementById('produto-' + id).remove()
-                })
+                document.getElementById('produto-' + id).remove()
+                location.reload()
+            })
         }
-        function compartilhar(id, titulo, descricao, img1) {
-            const texto = `${titulo}\n${descricao}\n${id}`
+
+        function modalAlterar(id, titulo, descricao, preco) {
+            document.getElementById('alterar-id').value = id
+            document.getElementById('alterar-titulo').value = titulo
+            document.getElementById('alterar-descricao').value = descricao
+            document.getElementById('alterar-preco').value = preco
+            modalAlterar_el.classList.remove('hidden')
+        }
+
+        function salvarAlteracao() {
+            const id = document.getElementById('alterar-id').value
+            const titulo = document.getElementById('alterar-titulo').value
+            const descricao = document.getElementById('alterar-descricao').value
+            const preco = document.getElementById('alterar-preco').value
+            const formData = new FormData()
+            formData.append('id', id)
+            formData.append('titulo', titulo)
+            formData.append('descricao', descricao)
+            formData.append('preco', preco)
+            fecharModalAlterar()
+            fetch('/alterar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(() => location.reload())
+        }
+
+        function compartilhar(id, titulo, descricao, preco, img1) {
+            const texto = `======================\n      *Produto:* ${titulo}\n\n*Descrição:*_${descricao}_\n*R$* _${preco}_\n======================`
             window.open('https://wa.me/?text=' + encodeURIComponent(texto))
-            }
+        }
+
+        function encomendar(titulo, descricao, id, preco) {
+            const link = `${window.location.origin}/produto/${id}`
+            const texto = `*Eu querooo...* \n*Produto:* ${titulo}\n*Descrição:* _${descricao}_\n*ID:* ${id}\n*R$* ${preco}\n*Link: *${link}`
+            window.open('https://wa.me/?text=' + encodeURIComponent(texto))
+        }
     </script>
-<footer class="text-center p-4 text-pencil mt-8">
-    Desenvolvido por Henrique Stafocher
-</footer>
+
+    <footer class="text-center p-4 text-pencil mt-8">
+        Desenvolvido por Henrique Stafocher
+    </footer>
 </body>
 </html>

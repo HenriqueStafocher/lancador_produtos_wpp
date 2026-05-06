@@ -36,6 +36,17 @@
         @apply bg-green-300 p-2 rounded cursor-pointer w-[8rem]
         active:scale-95 active:brightness-90 transition-all hover:bg-green-500;
     }
+
+    .btn-alterar {
+        @apply bg-yellow-300 p-2 rounded cursor-pointer w-[8rem]
+        active:scale-95 active:brightness-90 transition-all hover:bg-yellow-500;
+    }
+
+    .btn-encomendar {
+        @apply bg-green-400 p-2 rounded cursor-pointer w-[8rem]
+        active:scale-95 active:brightness-90 transition-all hover:bg-green-600;
+    }
+
     .modal-overlay {
         @apply fixed inset-0 bg-ink/50 flex items-center justify-center z-50;
     }
