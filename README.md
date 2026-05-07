@@ -178,7 +178,7 @@ Este foi meu primeiro projeto completo em Python. Desenvolvido do zero, sem expe
 Desenvolvido por **Henrique Stafocher** 🚀
  
 [![GitHub](https://img.shields.io/badge/GitHub-HenriqueStafocher-181717?style=flat&logo=github)](https://github.com/HenriqueStafocher)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Henrique_Stafocher-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/henriquestafocher)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Henrique_Stafocher-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/henrique-stafocher)
  
 ---
  
