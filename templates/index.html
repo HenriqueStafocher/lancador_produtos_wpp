@@ -82,7 +82,7 @@
                 <div class="flex flex-wrap gap-2 justify-center mt-2 mx-auto px-4 w-full">
                     {% if session.get('logado') %}
                         <button onclick="deletarProduto({{produto[0]}})" class="btn-vendido">Vendido</button>
-                        <button onclick="modalAlterar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', {{ produto[7] }})" class="btn-alterar">Alterar</button>
+                        <button onclick="modalAlterar({{ produto[0] }}, '{{ produto[1]|tojson }}', '{{ produto[2]|tojson }}', {{ produto[7] }})" class="btn-alterar">Alterar</button>
                         <button onclick="compartilhar({{ produto[0] }}, '{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[7] }}', '{{ produto[3] }}')" class="btn-whatsapp">Compartilhar</button>
                     {% endif %}
                     <button onclick="encomendar('{{ produto[1] }}', '{{ produto[2] }}', '{{ produto[0] }}', '{{ produto[7] }}')" class="btn-encomendar">Encomendar</button>
