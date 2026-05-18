@@ -72,7 +72,13 @@
     <!-- Usando Jinja2 para puxar os produtos do Banco para o HTML -->
     <div class="div-cards">
     {% for produto in produtos %}
-        <div id="produto-{{ produto[0] }}" class="card-produto flex flex-col">
+        <div id="produto-{{ produto[0] }}"
+             class="card-produto flex flex-col"
+             data-id="{{ produto[0] }}"
+             data-titulo="{{ produto[1]|e }}"
+             data-descricao="{{ produto[2]|e }}"
+             data-preco="{{ produto[7] }}"
+             data-img="{{ produto[3] }}">
             <img src="{{ produto[3] }}" alt="{{ produto[1] }}" class="card-imagem">
             <div class="p-2 flex flex-col flex-1">
                 <p class="font-display text-xl text-ink font-semibold">{{ produto[1] }}</p>
@@ -81,19 +87,15 @@
                 <p class="text-pencil">{{ produto[2] }}</p>
                 <div class="flex flex-wrap gap-2 justify-center mt-2 mx-auto px-4 w-full">
                     {% if session.get('logado') %}
-                        <button onclick="deletarProduto({{produto[0]}})" class="btn-vendido">Vendido</button>
-                        <button onclick="modalAlterar({{ produto[0] }}, {{ produto[1]|tojson }}, {{ produto[2]|tojson }}, {{ produto[7] }})" class="btn-alterar">Alterar</button>
-                        <button onclick="compartilhar({{ produto[0] }}, {{ produto[1]|tojson }}, {{ produto[2]|tojson }}, {{ produto[7]|tojson }}, {{ produto[3]|tojson }})" class="btn-whatsapp">Compartilhar</button>
+                        <button onclick="deletarProduto(this)" class="btn-vendido">Vendido</button>
+                        <button onclick="modalAlterar(this)" class="btn-alterar">Alterar</button>
+                        <button onclick="compartilhar(this)" class="btn-whatsapp">Compartilhar</button>
                     {% endif %}
-                    <button onclick="encomendar({{ produto[1]|tojson }}, {{ produto[2]|tojson }}, {{ produto[0] }}, {{ produto[7]|tojson }})" class="btn-encomendar">Encomendar</button>
+                    <button onclick="encomendar(this)" class="btn-encomendar">Encomendar</button>
                 </div>
             </div>
         </div>
     {% endfor %}
-    </div>
-
-    <div>
-        
     </div>
 
     <script>
@@ -134,20 +136,23 @@
             .then(() => location.reload())
         }
 
-        function deletarProduto(id) {
+        function deletarProduto(btn) {
+            const id = btn.closest('[data-id]').dataset.id
             const formData = new FormData()
             formData.append('id', id)
-            fetch('/deletar', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('/deletar', { method: 'POST', body: formData })
             .then(() => {
                 document.getElementById('produto-' + id).remove()
                 location.reload()
             })
         }
 
-        function modalAlterar(id, titulo, descricao, preco) {
+        function modalAlterar(btn) {
+            const card = btn.closest('[data-id]')
+            const id = card.dataset.id
+            const titulo = card.dataset.titulo
+            const descricao = card.dataset.descricao
+            const preco = card.dataset.preco
             document.getElementById('alterar-id').value = id
             document.getElementById('alterar-titulo').value = titulo
             document.getElementById('alterar-descricao').value = descricao
@@ -166,19 +171,25 @@
             formData.append('descricao', descricao)
             formData.append('preco', preco)
             fecharModalAlterar()
-            fetch('/alterar', {
-                method: 'POST',
-                body: formData
-            })
+            fetch('/alterar', { method: 'POST', body: formData })
             .then(() => location.reload())
         }
 
-        function compartilhar(id, titulo, descricao, preco, img1) {
+        function compartilhar(btn) {
+            const card = btn.closest('[data-id]')
+            const titulo = card.dataset.titulo
+            const descricao = card.dataset.descricao
+            const preco = card.dataset.preco
             const texto = `======================\n      *Produto:* ${titulo}\n\n*Descrição:*_${descricao}_\n*R$* _${preco}_\n======================`
             window.open('https://wa.me/?text=' + encodeURIComponent(texto))
         }
 
-        function encomendar(titulo, descricao, id, preco) {
+        function encomendar(btn) {
+            const card = btn.closest('[data-id]')
+            const id = card.dataset.id
+            const titulo = card.dataset.titulo
+            const descricao = card.dataset.descricao
+            const preco = card.dataset.preco
             const link = `${window.location.origin}/produto/${id}`
             const texto = `*Eu querooo...* \n*Produto:* ${titulo}\n*Descrição:* _${descricao}_\n*ID:* ${id}\n*R$* ${preco}\n*Link: *${link}`
             window.open('https://wa.me/5519998475720?text=' + encodeURIComponent(texto))
